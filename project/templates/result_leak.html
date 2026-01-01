@@ -1,0 +1,52 @@
+{% load static %}
+{% include "css.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Leak Detection Result</title>
+</head>
+<body>
+
+{% include "header.html" %}
+
+   
+
+<section class="appointment-area area-padding-top">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <div class="">
+          <h2 class="mb-4">🔍 Leak Detection Result</h2>
+
+          <div class="alert {% if leak_detected %}alert-danger{% else %}alert-success{% endif %} py-4 fs-4 d-flex justify-content-center align-items-center">
+            {% if leak_detected %}
+              <i class="fas fa-exclamation-triangle me-2"></i> <strong>Leak Detected</strong>
+            {% else %}
+              <i class="fas fa-check-circle me-2"></i> <strong>No Leak Detected</strong>
+            {% endif %}
+          </div>
+
+          {% if confidence %}
+            <p class="fs-5 mt-3">Model Confidence: <strong>{{ confidence }}%</strong></p>
+          {% endif %}
+
+          {% if explanation_image_url %}
+            <div class="mt-4">
+              <h5 class="mb-2">🧠 Model Explanation</h5>
+              <img src="{{ explanation_image_url }}" alt="Model Explanation" class="img-fluid rounded shadow-sm mt-2">
+            </div>
+          {% endif %}
+
+          <a href="{% url 'leak_form' %}" class="btn btn-outline-primary mt-4 d-inline-flex align-items-center">
+            <i class="fas fa-arrow-left me-2"></i> Try Another Audio
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<br><br>
+
+</body>
+</html>

@@ -1,0 +1,78 @@
+{% load static %}
+{% include "css.html" %}
+
+<style>
+    {% comment %} body{
+           background-image: url("{% static 'img/background/bg_2.png' %}");
+           
+    } {% endcomment %}
+
+    .custom-background {
+        background-image: url("{% static 'img/background/bg_2.png' %}");
+        background-size: cover;
+        position: relative; 
+    }
+
+</style>
+{% include "header.html" %}
+
+<body>
+    
+  
+
+<!--================About  Area =================-->
+<section class="about-area" style="height:700px !important" >
+    <div class="container" style="margin-top:-160px !important" >
+        <div class="row align-items-center">
+            <div class="col-md-10 offset-md-1 col-lg-6 offset-lg-6 offset-xl-7 col-xl-5">
+                <div class="about-content">
+                    <h4>Silent Vigilance</h4>
+                    {% comment %} <h6>Give their their without moving were stars called so divide in female be moving night may fish him</h6> {% endcomment %}
+                    <p>
+Patients on dialysis often experience <strong>unnoticed pain</strong>. <strong>Our real-time facial expression analysis system</strong> detects and classifies pain levels—<strong>no pain</strong>, <strong>soft</strong>, <strong>moderate</strong>, or <strong>severe</strong>—using a simple camera. This <strong>silent assistant</strong> enables caregivers to identify discomfort early and respond promptly, improving <strong>personalized patient care</strong>.
+</p>
+ </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--================About Area End =================-->
+
+
+        <div  class="custom-background">
+  
+            <div class="row">
+            
+
+                <div class="col-md-6 col-lg-4" style="margin-left:450px ; margin-top:100px; margin-button:50px !important">
+                    <div class="card-service text-center text-lg-left mb-4 mb-lg-0" style="margin-bottom:50px !important">
+                        <span class="card-service__icon">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
+  <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
+  <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+</svg>
+                        </span>
+                        <h3 class="card-service__title">Silent Vigilance</h3>
+                        <p class="card-service__subtitle">During the simulation, the camera activates to analyze the face in real time and automatically detect the pain level.</p>
+                        <div class="text-center mt-3" style=" margin-top:50px">
+                        
+ <a href="{% url 'start_camera' %}">
+                    <button class="btn btn-outline-secondary" onclick="startSimulation()">Simulation</button><br><br>
+                  </a>
+</div>
+
+                    </div>
+                </div>
+
+        
+
+            </div>
+        </div>
+        
+  <div class="sep">
+    </div>
+
+    
+    <!--================ Feature section end =================-->  
+
+{% include "footer.html" %}

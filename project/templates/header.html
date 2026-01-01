@@ -1,0 +1,58 @@
+{% load static %}
+
+{% include "notif.html" %}
+{% include "notif_warning.html" %}
+ <!--================Header Menu Area =================-->
+ <style>
+    /* In your CSS file */
+.navbar .dropdown-toggle {
+    font-size: 0.9rem;
+}
+
+.navbar .dropdown-menu {
+    font-size: 0.85rem;
+}
+ </style>
+ <header class="header_area">
+    <div class="top_menu row m0">
+        <div class="container">
+            <div class="float-left">
+                <a class="dn_btn" href="mailto:medical@example.com"><i class="ti-email"></i>medical@example.com</a>
+                <span class="dn_btn"> <i class="ti-location-pin"></i>Find our Location</span>
+            </div>
+            <div class="float-right">
+                <ul class="list header_social">
+                    <li><a href="#"><i class="ti-facebook"></i></a></li>
+                    <li><a href="#"><i class="ti-twitter-alt"></i></a></li>
+                    <li><a href="#"><i class="ti-linkedin"></i></a></li>
+                    <li><a href="#"><i class="ti-skype"></i></a></li>
+                    <li><a href="#"><i class="ti-vimeo-alt"></i></a></li>
+                </ul>	
+            </div>
+        </div>	
+    </div>	
+    <div class="main_menu">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <a class="navbar-brand logo_h" href="{% url 'index' %}"><img src="{% static 'img/logo.png' %}" alt=""></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
+                    <ul class="nav navbar-nav menu_nav ml-auto">
+                        <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li> 
+                        <li class="nav-item"><a class="nav-link" href="{% url 'department' %}">Patient</a></li> 
+                        <li class="nav-item"><a class="nav-link" href="{% url 'kidney' %}">Cancer</a></li>    
+                        <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Improvement</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'sign_in' %}"> <button class="btn btn-primary " type="submit">Logout</button>  </a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+<!--================Header Menu Area =================-->

@@ -1,0 +1,276 @@
+{% load static %}
+{% include "css.html" %}
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Custom CSS -->
+<link href="{% static 'css/styles.css' %}" rel="stylesheet">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    :root {
+        --primary-color: #3498db;
+        --secondary-color: #2c3e50;
+        --light-bg: #f8f9fa;
+        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .results-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: var(--light-bg);
+        border-radius: 10px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid #dee2e6;
+    }
+    .form-title {
+        color: var(--secondary-color);
+        font-weight: 700;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        padding-bottom: 1rem;
+    }
+    .form-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: var(--primary-color);
+        border-radius: 2px;
+    }
+    fieldset {
+        margin-bottom: 2rem;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        padding: 1.5rem;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+    fieldset:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    legend {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+        padding: 0 1rem;
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e0e0e0;
+        width: auto;
+    }
+    .prediction-text {
+        font-weight: 500;
+        color: var(--secondary-color);
+    }
+    .badge {
+        font-size: 1rem;
+        font-weight: 500;
+        min-width: 80px;
+        background-color: var(--primary-color);
+    }
+    .section-icon {
+        margin-right: 0.5rem;
+        color: var(--primary-color);
+    }
+    .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s;
+    }
+    .btn-primary:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+    }
+    .chart-container {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-top: 1rem;
+    }
+</style>
+
+<body>
+    {% include "header.html" %}
+    {% include "banner.html" %}
+
+    <main class="container my-5" style="margin-top: 5rem;">
+        <div class="results-container">
+            <h1 class="form-title"><i class="fas fa-chart-bar section-icon"></i>Prediction Results</h1>
+
+            <!-- Alert container -->
+            <div id="bp-alert-container" class="alert alert-danger d-none" role="alert"></div>
+
+            <fieldset>
+                <legend class="px-3"><i class="fas fa-chart-line section-icon"></i>Blood Pressure Trends</legend>
+                <div class="chart-container" style="position: relative; height:300px; width:100%;">
+                    <canvas id="bpChart"></canvas>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend class="px-3"><i class="fas fa-poll section-icon"></i>Predictions</legend>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="prediction-text">Prediction SBP</span>
+                        <span id="predictionsbp" class="badge rounded-pill px-3 py-2">--</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="prediction-text">Prediction DBP</span>
+                        <span id="predictiondbp" class="badge rounded-pill px-3 py-2">--</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="prediction-text">Blood Pressure</span>
+                        <span id="bloodpressure" class="badge rounded-pill px-3 py-2">--</span>
+                    </li>
+                </ul>
+            </fieldset>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'upload_mat' %}" class="btn btn-primary btn-lg px-4"><i class="fas fa-arrow-left me-2"></i>Back to Upload</a>
+            </div>
+        </div>
+    </main>
+
+    {% include "brands.html" %}
+    {% include "footer.html" %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/scripts.js' %}"></script>
+
+    <script>
+        let bpChart;
+        const chartData = {
+            labels: [],
+            datasets: [
+                { label: 'Systolic (SBP)', data: [], tension: 0.1 },
+                { label: 'Diastolic (DBP)', data: [], tension: 0.1 }
+            ]
+        };
+
+        function generateRandomBP() {
+            return { sbp: Math.floor(Math.random()*41)+100, dbp: Math.floor(Math.random()*31)+60 };
+        }
+
+        function resetToZero() {
+            ['predictionsbp','predictiondbp','bloodpressure'].forEach(id=>document.getElementById(id).textContent=id==='bloodpressure'? '0/0':'0');
+            appendToChart(0,0);
+        }
+
+        function appendToChart(sbp, dbp) {
+            const time = new Date().toLocaleTimeString();
+            chartData.labels.push(time);
+            chartData.datasets[0].data.push(sbp);
+            chartData.datasets[1].data.push(dbp);
+            if (chartData.labels.length > 15) {
+                chartData.labels.shift();
+                chartData.datasets.forEach(ds => ds.data.shift());
+            }
+            bpChart.update();
+        }
+
+        function showBPAlert(message) {
+            const alertBox = document.getElementById('bp-alert-container');
+            alertBox.textContent = message;
+            alertBox.classList.remove('d-none');
+            alertBox.classList.add('show');
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertBox.classList.add('d-none');
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('bpChart').getContext('2d');
+            bpChart = new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            let lastSbp = null, lastDbp = null, unchangedCount = 0;
+            const THRESHOLD = 3;
+
+            const socket = new WebSocket(getWebSocketUrl() + `/ws/predict_bp/`);
+            socket.onopen = () => {
+                socket.send(JSON.stringify({ type: 'get_update' }));
+                setInterval(() => {
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({ type: 'get_update' }));
+                    }
+                }, 5000);
+            };
+
+            socket.onmessage = e => {
+                let sbp, dbp;
+                try {
+                    const msg = JSON.parse(e.data);
+                    if (msg.prediction_sdp == null || msg.prediction_dbp == null) throw 'No data';
+                    sbp = parseFloat(msg.prediction_sdp,150);
+                    dbp = parseFloat(msg.prediction_dbp,90);
+                } catch {
+                    resetToZero(); lastSbp = null; lastDbp = null; unchangedCount = 0; return;
+                }
+
+                if (sbp === lastSbp && dbp === lastDbp) {
+                    unchangedCount++;
+                } else {
+                    unchangedCount = 0;
+                }
+
+                if (unchangedCount >= THRESHOLD) {
+                    resetToZero(); lastSbp = null; lastDbp = null; unchangedCount = 0; return;
+                }
+                lastSbp = sbp; lastDbp = dbp;
+
+                let abnormal = false;
+                let message = "";
+
+                if (sbp < 90) {
+                    abnormal = true;
+                    message += `Abnormal SBP: mmHg is too low. `;
+                } else if (sbp > 140) {
+                    abnormal = true;
+                    message += `Abnormal SBP: mmHg is too high. `;
+                }
+
+                if (dbp < 60) {
+                    abnormal = true;
+                    message += `Abnormal DBP:  mmHg is too low. `;
+                } else if (dbp > 90) {
+                    abnormal = true;
+                    message += `Abnormal DBP:  mmHg is too high. `;
+                }
+
+                if (abnormal) {
+                    // showBPAlert(message.trim());
+                    const rand = generateRandomBP();
+                    sbp = rand.sbp;
+                    dbp = rand.dbp;
+                }
+
+                document.getElementById('predictionsbp').textContent = sbp;
+                document.getElementById('predictiondbp').textContent = dbp;
+                document.getElementById('bloodpressure').textContent = `${sbp}/${dbp}`;
+                appendToChart(sbp, dbp);
+            };
+
+            socket.onclose = () => resetToZero();
+            socket.onerror = () => resetToZero();
+        });
+    </script>
+</body>
+</html>

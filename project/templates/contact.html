@@ -1,0 +1,90 @@
+
+{% load static %}
+{% include "css.html" %}
+
+<style>
+.rounded-img {
+    border-radius: 50%; /* pour un cercle parfait */
+    width: 100%; /* facultatif selon tes besoins */
+    height: auto;
+}
+#my-banner {
+
+  background-image: url("{% static 'img/banner/home-banner.jpg' %}");
+    height: 250px; /* ✅ Réduction visible */
+  display: flex;
+  align-items: flex-start; /* Optionnel : aligne le contenu en haut */
+  padding-top: 30px;
+
+
+}
+#left{
+margin-left:180px;
+margin-right:80px;
+}
+
+  
+</style>
+<body>
+    
+{% include "header.html" %}
+    <section id="my-banner" class="banner-area d-flex align-items-center">
+        <div class="container">
+            <div class="row" id="text">
+                <div  class="col-md-8 col-lg-6 col-xl-5">
+                    <h1>Process <br>
+                    Optimization</h1>
+                    <p>Intelligent dialysis session planning and water management optimize treatment schedules based on each patient’s condition, reduce unnecessary resource use, and ensure safer, more efficient care delivery.</p>
+</p>
+                </div>
+            </div>
+        </div>
+    </section>
+<br ><br> <br>
+
+ 
+<!--================ Service section start =================-->  
+
+    <div class="service-area area">
+        <div class="container">
+            <div class="row">
+
+
+                    <div class="col-md-6 col-lg-4" id="left">
+                    <div class="card-service text-center text-lg-left mb-4 mb-lg-0">
+                                        
+                               <span class="card-service__icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="GRIS" class="bi bi-calendar-heart" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4zM1 14V4h14v10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1m7-6.507c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132"/>
+</svg>
+</span>
+                       
+                        <h3 class="card-service__title">Dialysis Session</h3>
+                        <p class="card-service__subtitle">Predicts the optimal frequency and duration of dialysis sessions for personalized patient care.</p>
+                        <a class="card-service__link" href="{% url 'live_prediction' %}">Use The Model</a>
+                    </div>
+                </div>
+
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-service text-center text-lg-left mb-4 mb-lg-0">
+                           <span class="card-service__icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="Black" class="bi bi-activity" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M6 2a.5.5 0 0 1 .47.33L10 12.036l1.53-4.208A.5.5 0 0 1 12 7.5h3.5a.5.5 0 0 1 0 1h-3.15l-1.88 5.17a.5.5 0 0 1-.94 0L6 3.964 4.47 8.171A.5.5 0 0 1 4 8.5H.5a.5.5 0 0 1 0-1h3.15l1.88-5.17A.5.5 0 0 1 6 2"/>
+</svg> </span>
+                        <h3 class="card-service__title">water management</h3>
+                        <p class="card-service__subtitle">AI-powered sound analysis detects water leaks to ensure safe and efficient dialysis operations.</p>
+                        <a class="card-service__link" href="{% url 'leak_form' %}">Use The Model </a>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>    
+    <!--================ Service section end =================-->    
+
+
+
+
+    {% include "footer.html" %}

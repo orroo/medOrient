@@ -1,0 +1,239 @@
+
+{% load static %}
+{% include "css.html" %}
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--light-bg);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .form-title {
+            color: var(--secondary-color);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        
+        .form-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+        
+        fieldset {
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            padding: 1.5rem;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        fieldset:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        legend {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+            padding: 0 1rem;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+            width: auto;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #495057;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .section-icon {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        /* File upload custom styles */
+        .custom-file {
+            position: relative;
+            display: block;
+        }
+        
+        .custom-file-input {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: calc(3rem + 2px);
+            margin: 0;
+            opacity: 0;
+        }
+        
+        .custom-file-label {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1;
+            height: calc(3rem + 2px);
+            padding: 0.75rem 1rem;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .custom-file-label::after {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 3;
+            display: block;
+            height: calc(3rem + 2px);
+            padding: 0.75rem 1rem;
+            line-height: 1.5;
+            color: #495057;
+            content: "Browse";
+            background-color: #e9ecef;
+            border-left: 1px solid #ced4da;
+            border-radius: 0 0.5rem 0.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-text {
+            font-size: 0.875rem;
+            margin-top: 2rem;
+        }
+        
+        .invalid-feedback {
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+
+<body>
+      
+{% include "header.html" %}
+  
+    <div class="form-container" >
+        <h1 class="form-title">
+            <i class="fas fa-file-upload section-icon"></i>Upload .mat File for Prediction
+        </h1>
+        
+        <form method="post" enctype="multipart/form-data" >
+            {% csrf_token %}
+            
+            <fieldset class="mb-4">
+                <legend><i class="fas fa-file-medical section-icon"></i>File Information</legend>
+                
+                <div class="form-group mb-4">
+                    <label for="{{ form.mat_file.id_for_label }}" class="form-label required-field">
+                        {{ form.mat_file.label }}
+                    </label>
+                    <div class="custom-file">
+                        {{ form.mat_file }}
+                        <label class="custom-file-label" for="{{ form.mat_file.id_for_label }}">Choose file</label>
+                        {% if form.file.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.file.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="invalid-feedback">Please select a valid .mat file</div>
+                        {% endif %}
+                    </div>
+                    <small class="form-text text-muted">{{ form.mat_file.help_text }}</small>
+                </div>
+            </fieldset>
+
+            <div class="d-flex justify-content-center mt-5">
+                <button type="submit" class="btn btn-primary btn-lg px-4">
+                    <i class="fas fa-upload me-3"></i>Upload & Predict
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    
+</body>
+</html>
+
+
+  {% include "brands.html" %}
+        
+        {% include "footer.html" %}
+        

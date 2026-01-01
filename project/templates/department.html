@@ -1,0 +1,95 @@
+
+{% load static %}
+{% include "css.html" %}
+
+<style>
+.rounded-img {
+    border-radius: 50%; /* pour un cercle parfait */
+    width: 100%; /* facultatif selon tes besoins */
+    height: auto;
+}
+#my-banner {
+  margin-top: 100px;
+  background-image: url("{% static 'img/patientb.png' %}");
+  background-position: 500px center;
+  background-repeat: no-repeat;
+  background-size: 800px auto; /* ✅ Reduit la taille de l'image */
+height: 300px !important; /* ✅ Hauteur fixe plus petite */
+}
+
+  
+</style>
+<body>
+    
+{% include "header.html" %}
+    <section id="my-banner" class="banner-area d-flex align-items-center">
+        <div class="container">
+            <div class="row" id="text">
+                <div  class="col-md-8 col-lg-6 col-xl-5">
+                    <h1>Patient<br>
+                    Monitoring</h1>
+                    <p>Continuous monitoring of blood pressure, pain intensity, and vascular access status allows for early detection of complications, ensuring timely medical interventions and reducing the risk of severe outcomes for dialysis patients.</p>
+</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+ 
+<!--================ Service section start =================-->  
+
+    <div class="service-area area">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-service text-center text-lg-left mb-4 mb-lg-0">
+                                         <span class="card-service__icon">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="black" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
+  <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
+  <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+</svg>
+                        </span>
+                        <h3 class="card-service__title">Silent Vigilance</h3>
+                        <p class="card-service__subtitle">During the simulation, the camera activates to analyze the face in real time and automatically detect the pain level.</p>
+                        <a class="card-service__link" href="{% url 'face' %}">Use The Model</a>
+                    </div>
+                </div>
+
+                  <div class="col-md-6 col-lg-4">
+                    <div class="card-service text-center text-lg-left mb-4 mb-lg-0">
+                        <span class="card-service__icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="black" class="bi bi-heart-pulse" viewBox="0 0 16 16">
+  <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053.918 3.995.78 5.323 1.508 7H.43c-2.128-5.697 4.165-8.83 7.394-5.857q.09.083.176.171a3 3 0 0 1 .176-.17c3.23-2.974 9.522.159 7.394 5.856h-1.078c.728-1.677.59-3.005.108-3.947C13.486.878 10.4.28 8.717 2.01zM2.212 10h1.315C4.593 11.183 6.05 12.458 8 13.795c1.949-1.337 3.407-2.612 4.473-3.795h1.315c-1.265 1.566-3.14 3.25-5.788 5-2.648-1.75-4.523-3.434-5.788-5"/>
+  <path d="M10.464 3.314a.5.5 0 0 0-.945.049L7.921 8.956 6.464 5.314a.5.5 0 0 0-.88-.091L3.732 8H.5a.5.5 0 0 0 0 1H4a.5.5 0 0 0 .416-.223l1.473-2.209 1.647 4.118a.5.5 0 0 0 .945-.049l1.598-5.593 1.457 3.642A.5.5 0 0 0 12 9h3.5a.5.5 0 0 0 0-1h-3.162z"/>
+</svg>
+                        </span>
+                        <h3 class="card-service__title">Vascular Sonics</h3>
+                        <p class="card-service__subtitle">Detects vascular issues early by analyzing sound patterns, ensuring safe and uninterrupted dialysis sessions.</p>
+                        <a class="card-service__link" href="{% url 'vae_upload' %}">Use The Model</a>
+                    </div>
+                </div>
+
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-service text-center text-lg-left mb-4 mb-lg-0">
+                           <span class="card-service__icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="Black" class="bi bi-activity" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M6 2a.5.5 0 0 1 .47.33L10 12.036l1.53-4.208A.5.5 0 0 1 12 7.5h3.5a.5.5 0 0 1 0 1h-3.15l-1.88 5.17a.5.5 0 0 1-.94 0L6 3.964 4.47 8.171A.5.5 0 0 1 4 8.5H.5a.5.5 0 0 1 0-1h3.15l1.88-5.17A.5.5 0 0 1 6 2"/>
+</svg> </span>
+                        <h3 class="card-service__title">Blood Pressure</h3>
+                        <p class="card-service__subtitle">Predicting the next blood pressure value in real time enables proactive adjustments during dialysis, enhancing patient stability.</p>
+                        <a class="card-service__link" href="{% url 'live_data' %}">Use The Model </a>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>    
+    <!--================ Service section end =================-->    
+
+
+
+
+    {% include "footer.html" %}

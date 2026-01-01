@@ -1,0 +1,29 @@
+{% load static %}
+{% include "css.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Analysis Result - Water Leak Detection</title>
+</head>
+<body>
+
+{% include "header.html" %}
+
+<section class="result-area area-padding-top">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h1>Analysis Result</h1>
+        <div class="result-message mt-4 mb-4">
+          <strong>{{ message|safe }}</strong>
+        </div>
+        <a href="{% url 'vae_upload' %}" class="btn btn-primary">Analyze another clip</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+</body>
+</html>
