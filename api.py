@@ -3,35 +3,35 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.status import HTTP_404_NOT_FOUND,HTTP_400_BAD_REQUEST
 from pydantic import BaseModel 
-
+from functions import *
 
 app = FastAPI()
 
 
 
+from tkinter.filedialog import askopenfilename
+
+pdf_path = [r"C:\Users\omarr\OneDrive\Desktop\New folder\pdf_pi\zahrouni maya (1).pdf"]
+
+
 class QUESTION_Request(BaseModel):
     question: str
 
-@app.get("/llm", response_class=HTMLResponse)
+
+
+
+@app.post("/llm", response_class=HTMLResponse)
 async def index(request: QUESTION_Request):
     """
     Render the main chat interface template with server and Grafana details.
     """
     try:
-        #### make sure bich tbaddel el system wo user prompt kima t7ib 
-        system_prompt="""you are a medical chatbot .  
-        you will be given some question and you will give an answer to it. 
-        use the given context to answer the question.
-        """
-        #### #### #### #### #### #### #### #### #### #### #### #### #### 
-        user_prompt=f"""question:
-        {request.question} 
-        """
-        #### #### #### #### #### #### #### #### #### #### #### #### #### 
-
-        answer=query_LLM(system_prompt,user_prompt)  #add your function here
-        
-        return{"answer":answer}
+        print("question",request.question)
+        print("pdf_path",pdf_path)
+        answer=analyse_pdf_chat(request.question, pdf_path, ESPRIT_API_KEY)
+        return JSONResponse(content={
+        "answer": answer
+    })
 
     except Exception as e:
         print(e)
