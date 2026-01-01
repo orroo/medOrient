@@ -106,9 +106,9 @@ python app.py
 ## Esprit School of Engineering
 
 This project was completed under the guidance of [Professor Sonia MESBEH
-](mailto:sonia.mesbeh@esprit.tn) and [Professor Jihene Hlel
-](mailto:jihene.hlel@esprit.tn)   at Esprit School of Engineering.
+](mailto:sonia.mesbeh@esprit.tn) and [Professor Dorsaf Hrizi
+](mailto:dorsaf.hrizi@esprit.tn)   at Esprit School of Engineering.
 
 ## Acknowledgments
-We thank the faculty, clinical collaborators, and peers for their valuable input and support throughout the development of DEEP_NEPHRO.
+We thank the faculty, clinical collaborators, and peers for their valuable input and support throughout the development of medOrient
 
