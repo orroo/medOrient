@@ -1,25 +1,43 @@
-# DEEP_NEPHRO: AI-Powered Dialysis Monitoring and Optimization System
-
-> A smart and scalable system for enhancing dialysis care through intelligent monitoring, clinical decision support, and treatment optimization.  
+# A Smart and Multimodal Artificial Intelligence System for Intelligent Medical Assistance and Early Disease Detection
 > Developed as part of an academic project at **Esprit School of Engineering**.
 
 ---
 
 ## 🩺 Overview
 
-**DEEP_NEPHRO** is a university project from **Esprit School of Engineering** that aims to revolutionize dialysis treatment using artificial intelligence and real-time data processing. The system is designed to assist healthcare professionals by monitoring patients during dialysis sessions, predicting optimal session duration and frequency, and providing early warnings of patient deterioration.
+This project is an academic initiative conducted at Esprit School of Engineering, aiming to enhance healthcare accessibility, medical assistance, and early disease detection through the use of Artificial Intelligence and multimodal data analysis.
 
-By combining medical knowledge, machine learning, and web technologies, DEEP_NEPHRO helps deliver personalized and efficient dialysis care while reducing resource waste.
+The proposed system integrates several intelligent components, including medical chatbots, medical document analysis, speech and image processing, and decision-support mechanisms. It is designed to assist both patients and healthcare professionals by providing understandable medical information, supporting symptom-based reasoning, and enabling early detection of critical health conditions.
+
+By combining Natural Language Processing, Computer Vision, Speech Technologies, and AI-driven reasoning, the system contributes to a more inclusive, accessible, and proactive digital health ecosystem, particularly adapted to local linguistic and healthcare contexts.
 
 ---
 
-## 🚀 Features
+🚀 Key Features
 
-- 📊 **Real-Time Monitoring**: Continuously tracks patient vitals during dialysis.
-- 🧠 **AI-Driven Predictions**: Estimates ideal session duration and frequency.
-- 🔔 **Early Deterioration Detection**: Warns staff about potential risks.
-- 💡 **Explainable AI**: Uses SHAP values to ensure transparent decision-making.
-- 🌱 **Eco-Aware Optimization**: Minimizes water consumption.
+🧾 Intelligent Medical Document Analysis
+Automatic interpretation of prescriptions, laboratory reports, and medical PDFs, including blood test analysis and explanation of abnormal values.
+
+💬 AI-Based Medical Chatbots
+Interactive chatbots capable of answering questions about prescribed medications, diseases, and medical procedures, as well as providing public health information.
+
+🧠 Symptom-Oriented Medical Assistance
+An intelligent chatbot that dynamically generates follow-up questions, identifies possible diseases, evaluates associated risks, and recommends the appropriate medical specialist.
+
+🎤 Multilingual Voice Interaction
+Support for speech recognition (ASR) and text-to-speech (TTS) in Arabic, French, English, and Tunisian Arabic (Latin writing), ensuring natural and inclusive interaction.
+
+🧑‍⚕️ Early Stroke (AVC) Detection
+Multimodal analysis combining facial asymmetry detection and speech classification to estimate stroke risk levels with interpretable explanations.
+
+🦷 Dental Disease Detection
+Automated detection of dental caries from dental radiographic images using computer vision techniques.
+
+🫁 Pulmonary Disease Classification
+AI-based analysis of chest X-ray images to classify conditions such as COVID-19, tuberculosis, viral pneumonia, bacterial pneumonia, and normal cases.
+
+🌍 Context-Aware and Ethical Design
+The system emphasizes explainability, data interpretation transparency, and ethical use of AI while preserving the central role of healthcare professionals.
 
 ---
 
@@ -44,9 +62,7 @@ By combining medical knowledge, machine learning, and web technologies, DEEP_NEP
 
 ## 📁 Directory Structure
 ```bash
-DEEP_NEPHRO/
-├── biosignals_fb_to_mat_file-main/   # Script to keep IoT data updated for our monitoring
-├── flask app/                         # Flask API for predictions
+medOrient/
 ├── project/                           # Main website (Django project)
 ├── requirements.txt                   # Python dependencies
 ├── README.md                          # Project documentation
@@ -61,7 +77,7 @@ DEEP_NEPHRO/
 
 1. **Clone the repository**:
 ```bash
-git clone https://github.com/your-username/DEEP_NEPHRO.git
+git clone https://github.com/your-username/medOrient.git
 cd DEEP_NEPHRO
 ```
 
@@ -84,12 +100,7 @@ daphne project.asgi:application
 cd ../"flask app"
 python app.py
 ```
-6. **Run The IoT Data Updating Script**:
-```bash
-cd ../biosignals_fb_to_mat_file-main
-pip install -r requirements.txt  // dependencies first
-python fb2mat_synth.py
-```
+
 ## Acknowledgments
 
 ## Esprit School of Engineering
