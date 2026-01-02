@@ -1,10 +1,9 @@
 fastapi
 pydantic
 uvicorn
-langchain
-langchain_core
-pdfplumber
-langchain_text_splitters
-langchain_community
+dotenv
+faiss
+sentence_transformers
+numpy
+pandas
 openai
-httpx

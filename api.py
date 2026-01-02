@@ -3,22 +3,18 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.status import HTTP_404_NOT_FOUND,HTTP_400_BAD_REQUEST
 from pydantic import BaseModel 
-from functions import *
+
+from rag_func import *
 
 app = FastAPI()
 
+image_path = r"C:\Users\omarr\OneDrive\Desktop\New folder\ocr_api\WhatsApp Image 2025-12-02 à 15.34.03_a235721a.jpg"   # ou Desktop/3.jpeg si ton script est sur le bureau
 
-
-from tkinter.filedialog import askopenfilename
-
-pdf_path = [r"C:\Users\omarr\OneDrive\Desktop\New folder\pdf_pi\zahrouni maya (1).pdf"]
+data_path=r"C:\Users\omarr\OneDrive\Desktop\New folder\ocr_api\medicaments_clean_for_ocr.csv"
 
 
 class QUESTION_Request(BaseModel):
     question: str
-
-
-
 
 @app.post("/llm", response_class=HTMLResponse)
 async def index(request: QUESTION_Request):
@@ -26,12 +22,12 @@ async def index(request: QUESTION_Request):
     Render the main chat interface template with server and Grafana details.
     """
     try:
-        print("question",request.question)
-        print("pdf_path",pdf_path)
-        answer=analyse_pdf_chat(request.question, pdf_path, ESPRIT_API_KEY)
-        return JSONResponse(content={
-        "answer": answer
-    })
+        final_output=pipeline(data_path,image_path)  #add your function here
+        df = pd.read_csv(data_path)
+
+
+        answer= chat_with_prescription(request.question, final_output, df)
+        return JSONResponse(status_code=200, content={"answer":answer})
 
     except Exception as e:
         print(e)
@@ -40,6 +36,27 @@ async def index(request: QUESTION_Request):
             detail=f"error: {str(e)}"
         )
     
+
+
+# @app.get("/LLM", response_class=HTMLResponse)
+# async def index(request: QUESTION_Request):
+#     """
+#     Render the main chat interface template with server and Grafana details.
+#     """
+#     try:
+#         answer=pipeline(data_path,image_path)  #add your function here
+        
+#         return JSONResponse(status_code=200, content=answer)
+
+#     except Exception as e:
+#         print(e)
+#         raise HTTPException(
+#             status_code=HTTP_400_BAD_REQUEST,
+#             detail=f"error: {str(e)}"
+#         )
+    
+
+
 
 
 
