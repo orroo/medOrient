@@ -1,0 +1,324 @@
+{% load static %}
+{% include "css.html" %}
+    
+</head>
+
+<body>
+    <!--================Header Menu Area =================-->
+    {% include "header.html" %}
+
+    <!-- ================Header Menu Area =================  -->
+
+    <!--================Chat Section =================-->
+    <section class="chat-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 offset-lg-1">
+                    <div class="chat-container">
+                        <div class="chat-header">
+                            <div class="chat-header-icon">
+                                <i class="ti-pulse"></i>
+                            </div>
+                            <div class="chat-header-text">
+                                <h3>Dialysis Care Assistant</h3>
+                                <p>AI-powered support for your dialysis journey</p>
+                            </div>
+                        </div>
+
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message bot">
+                                <div class="message-avatar">
+                                    <i class="ti-pulse"></i>
+                                </div>
+                                <div>
+                                    <div class="message-content">
+                                        Hello! I'm your Dialysis Care Assistant. I'm here to help you with information about patient monitoring, session planning, and answering any questions you may have. How can I assist you today?
+                                    </div>
+                                    <div class="message-time">Just now</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quick-replies">
+                            <button class="quick-reply-btn" onclick="sendQuickReply('Tell me about patient monitoring')">
+                                Patient Monitoring
+                            </button>
+                            <button class="quick-reply-btn" onclick="sendQuickReply('What is vascular sonics?')">
+                                Vascular Sonics
+                            </button>
+                            <button class="quick-reply-btn" onclick="sendQuickReply('Explain dialysis sessions')">
+                                Dialysis Sessions
+                            </button>
+                            <button class="quick-reply-btn" onclick="sendQuickReply('How does pain detection work?')">
+                                Pain Detection
+                            </button>
+                        </div>
+
+                        <div class="chat-input-container">
+                            <button class="voice-button" id="micButton" onclick="toggleSpeechRecognition()">
+                                <i class="ti-microphone"></i>
+                            </button>
+                            <input 
+                                type="text" 
+                                class="chat-input" 
+                                id="messageInput" 
+                                placeholder="Type your message here..."
+                                onkeypress="handleKeyPress(event)"
+                            >
+                            <button class="send-button" onclick="sendMessage()">
+                                <i class="ti-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================Chat Section End =================-->
+
+    
+
+    <script>
+        const responses = {
+            'patient monitoring': 'Patient Monitoring involves continuous tracking of vital signs including blood pressure, pain levels, and vascular access health. Our AI-powered system provides real-time alerts to ensure timely interventions and optimal patient care.',
+            'vascular sonics': 'Vascular Sonics uses advanced sound pattern analysis to detect early signs of vascular issues. This technology ensures safe and uninterrupted dialysis sessions by identifying potential problems before they become critical.',
+            'dialysis sessions': 'Our AI system predicts the optimal frequency and duration of dialysis sessions based on individual patient data. This personalization helps improve treatment outcomes and enhances the overall patient experience.',
+            'pain detection': 'Our Silent Vigilance system uses real-time facial expression analysis to detect pain levels during dialysis. The camera-based system classifies pain as none, soft, moderate, or severe, enabling caregivers to respond promptly.',
+            'kidney abnormalities': 'The absence of continuous blood filtration leads to toxin buildup, which can contribute to the development of kidney tumors. Our AI-powered renal imaging identifies abnormalities at the earliest stage for better outcomes.',
+            'default': 'I understand you\'re asking about dialysis care. Our platform offers patient monitoring, early detection systems, and process optimization. Could you please be more specific about what you\'d like to know?'
+        };
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        }
+
+        // function addMessage(text, isUser) {
+        //     const messagesContainer = document.getElementById('chatMessages');
+        //     const messageDiv = document.createElement('div');
+        //     messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+        //     const avatarIcon = isUser ? 'ti-user' : 'ti-pulse';
+
+        //     const className = isUser ? 'message-content-user' : 'message-content';
+        //     messageDiv.innerHTML = `
+        //         <div class="message-avatar">
+        //             <i class="${avatarIcon}"></i>
+        //         </div>
+        //         <div>
+        //             <div class="${className}">${text}</div>
+        //             <div class="message-time">${getCurrentTime()}</div>
+        //         </div>
+        //     `;
+            
+        //     messagesContainer.appendChild(messageDiv);
+        //     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        // }
+
+        let recognition = null;
+        let isRecording = false;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('messageInput').value = transcript;
+                stopRecording();
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                stopRecording();
+            };
+
+            recognition.onend = function() {
+                stopRecording();
+            };
+        }
+
+        function toggleSpeechRecognition() {
+            if (!recognition) {
+                alert('Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.');
+                return;
+            }
+
+            if (isRecording) {
+                recognition.stop();
+                stopRecording();
+            } else {
+                recognition.start();
+                startRecording();
+            }
+        }
+
+        function startRecording() {
+            isRecording = true;
+            const micButton = document.getElementById('micButton');
+            micButton.classList.add('active');
+            document.getElementById('messageInput').placeholder = 'Listening...';
+        }
+
+
+        function stopRecording() {
+            isRecording = false;
+            const micButton = document.getElementById('micButton');
+            micButton.classList.remove('active');
+            document.getElementById('messageInput').placeholder = 'Type your message here...';
+        }
+
+        function speakText(text, button) {
+            if ('speechSynthesis' in window) {
+                // Stop any ongoing speech
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+
+                button.classList.add('speaking');
+
+                utterance.onend = function() {
+                    button.classList.remove('speaking');
+                };
+
+                utterance.onerror = function() {
+                    button.classList.remove('speaking');
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Text-to-speech is not supported in your browser.');
+            }
+        }   
+
+        function addMessage(text, isUser) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatarIcon = isUser ? 'ti-user' : 'ti-pulse';
+            
+            const speakerButton = isUser ? '' : `
+                <button class="speaker-button" onclick="speakText('${text.replace(/'/g, "\\'")}', this)">
+                    <i class="ti-volume"></i>
+                </button>
+            `;
+            const className = isUser ? 'message-content-user' : 'message-content';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="${avatarIcon}"></i>
+                </div>
+                <div>
+                    <div class="${className}">
+                        ${text}
+                        ${speakerButton}
+                    </div>
+                    <div class="message-time">${getCurrentTime()}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot typing-indicator active';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="ti-pulse"></i>
+                </div>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+
+        async function sendMessageToUrl(userMessage) {
+            const url = '{{ chatbot }}';
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mode: '{{ mode }}',
+                    question: userMessage
+                })
+            });
+            const data = await response.json();
+            console.log(data.answer);
+            return data.answer;
+        }
+
+
+        function getBotResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+            for (const key in responses) {
+                if (lowerMessage.includes(key)) {
+                    return responses[key];
+                }
+            }
+            
+            return responses['default'];
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            addMessage(message, true);
+            input.value = '';
+            
+            showTypingIndicator();
+            
+            const botResponse = await sendMessageToUrl(message);
+            removeTypingIndicator();
+
+            addMessage(botResponse, false);
+
+        }
+
+        function sendQuickReply(message) {
+            addMessage(message, true);
+            
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                removeTypingIndicator();
+                const botResponse = getBotResponse(message);
+                addMessage(botResponse, false);
+            }, 1500);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+    
+</body>
+

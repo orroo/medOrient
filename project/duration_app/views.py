@@ -1,64 +1,14 @@
 from django.shortcuts import render
-import torch
-import joblib
-import pandas as pd
-from sklearn.model_selection import train_test_split
-import numpy as np
-# Create your views here.
-# views.py
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 
 
+url="http://127.0.0.1:6700/chatbot"
 
-async def async_send_broadcast_notification(message):
-    channel_layer = get_channel_layer()
-    await channel_layer.group_send(
-        "notifications",  # The group name
-        {
-            "type": "send_notification",
-            "message": message
-        }
-    )
-
-
-# channel_layer = get_channel_layer() 26 10 2019
-                # 23 11   10 1 2020 
-# async_to_sync(channel_layer.group_send)(
-#     "notifications",
-#     {
-#         "type": "send_notification",
-#         "message": "New notification received!"
-#     }
-# )
-
-
-
-
-# @csrf_exempt
-# def send_notification(request):
-#     if request.method == "POST":
-#         data = json.loads(request.body)
-#         message = data.get("message", "Default message")
-
-#         channel_layer = get_channel_layer()
-#         async_to_sync(channel_layer.group_send)(
-#             "notifications",
-#             {
-#                 "type": "send_notification",
-#                 "message": message,
-#             }
-#         )
-#         return JsonResponse({"status": "sent"})
-
-
-
-
-
-import torch.nn as nn
+def chat_bot(request):
+    return render(request,"chatbot.html",{
+            "chatbot":url,
+            "mode":"vac"
+            }
+            )
 
 def about(request):
     return render(request,"about-us.html")

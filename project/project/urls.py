@@ -33,13 +33,15 @@ urlpatterns = [
     path('element/', views.element, name='element'),
     path('sign_in/', views.sign_in, name='sign_in'),
     path('sign_up/', views.sign_up, name='sign_up'),
-    path('face/', include('face.urls')),
-    path('duration/live/', views.live_prediction_view, name='live_prediction'),
-    path('bp/' , include('check_app.urls')),
-    path('leak/', include('leakage_detection_app.urls')),
-    path('vascular/', include('vascular_monitor.urls')),
-        path('face/', include('face.urls')),
-    path('kidney/', include('kidney.urls')),
+    
+    path('chatbot/', views.chat_bot, name='chatbot'),
+    # path('face/', include('face.urls')),
+    # path('duration/live/', views.live_prediction_view, name='live_prediction'),
+    # path('bp/' , include('check_app.urls')),
+    # path('leak/', include('leakage_detection_app.urls')),
+    # path('vascular/', include('vascular_monitor.urls')),
+        # path('face/', include('face.urls')),
+    # path('kidney/', include('kidney.urls')),
     
  
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

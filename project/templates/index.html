@@ -92,7 +92,6 @@ Harnessing AI to transform dialysis care smarter decisions, faster interventions
                        
                         <h3 class="card-service__title">Dialysis Session</h3>
                         <p class="card-service__subtitle">Predicts the optimal frequency and duration of dialysis sessions for personalized patient care.</p>
-                        <a class="card-service__link" href="{% url 'live_prediction' %}">Use The Model</a>
                     </div>
                 </div>
 
@@ -105,7 +104,6 @@ Harnessing AI to transform dialysis care smarter decisions, faster interventions
 
                         <h3 class="card-service__title">Kidney abnormalities</h3>
                         <p class="card-service__subtitle">The absence of continuous blood filtration leads to toxin buildup, which can contribute to the development of kidney tumors...</p>
-                        <a class="card-service__link" href="{% url 'kidney' %}">Use The Model</a>
                     </div>
                 </div>
 
@@ -119,7 +117,6 @@ Harnessing AI to transform dialysis care smarter decisions, faster interventions
                         </span>
                         <h3 class="card-service__title">Vascular Sonics</h3>
                         <p class="card-service__subtitle">Detects vascular issues early by analyzing sound patterns, ensuring safe and uninterrupted dialysis sessions.</p>
-                        <a class="card-service__link" href="{% url 'vae_upload' %}">Use The Model</a>
                     </div>
                 </div>
 
@@ -141,11 +138,12 @@ Harnessing AI to transform dialysis care smarter decisions, faster interventions
                         <h6>During the simulation, the camera activates to analyze the face in real time and automatically detect the pain level.</h6>
                         <p>Patients on dialysis often experience unnoticed pain.Our real-time facial expression analysis system detects and classifies pain levels no pain, soft, moderate, or severe using a  camera. This  silent assistant enables caregivers to identify discomfort early and respond promptly, improving personalized patient care.</p>
 
-                        <a class="link_one" href="{% url 'face' %}">Simulation</a>
 
                     </div>
                 </div>
             </div>
         </div>
     </section>
+</body>
+
     {% include "footer.html" %}

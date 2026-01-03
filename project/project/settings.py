@@ -38,11 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'duration_app',
-    'face',
-    'channels',
-    'check_app',
-    'leakage_detection_app',
-    'vascular_monitor',
+    # 'face',
+    # 'channels',
+    # 'check_app',
+    # 'leakage_detection_app',
+    # 'vascular_monitor',
 
 ]
 
@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
