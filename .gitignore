@@ -1,0 +1,8 @@
+.env
+model.h5
+*.log
+*.h5
+*.pt
+data/
+media/
+venv/

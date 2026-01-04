@@ -1,0 +1,326 @@
+{% load static %}
+{% include "css.html" %}
+<body>
+  {% include "header.html" %}
+
+  <section class="banner-area d-flex align-items-center" style="padding:2rem 0;background:#f5f7fb;">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="card" style="padding:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.08)">
+            <div class="row align-items-center">
+              <div class="col-md-7">
+                <h3 class="mb-3">Capture en direct — Dépistage d'AVC</h3>
+                <p class="mb-3">Cliquez sur <strong>Démarrer</strong> pour autoriser la caméra et le micro. Le système détectera un visage centré et stable, lancera l'analyse faciale côté serveur, puis vous demandera d'enregistrer la voix pour la fusion.</p>
+                <div class="d-flex gap-2 mb-3">
+                  <button id="startBtn" class="main_btn">Démarrer</button>
+                  <button id="recordBtn" class="main_btn_light" disabled>Enregistrer la voix</button>
+                </div>
+                <div id="status" style="margin-top:.5rem;color:#333;font-weight:600"></div>
+                <div id="phraseBox" style="margin-top:.6rem;color:#0b5; font-weight:700; font-size:1.05rem; display:none">aslema ena esmi -</div>
+                <div id="centerHint" style="margin-top:.4rem;color:#666;font-size:.95rem"></div>
+              </div>
+              <div class="col-md-5 text-center">
+                <div id="videoContainer" style="position:relative;display:inline-block">
+                  <video id="video" width="320" height="240" autoplay muted playsinline style="border-radius:8px;border:1px solid #e9ecef;max-width:100%"></video>
+                  <div id="overlayBox" style="position:absolute;left:0;top:0;border:3px solid rgba(0,0,0,0.2);border-radius:8px;pointer-events:none;display:none"></div>
+                  <div id="countdown" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);color:#fff;padding:8px 12px;border-radius:6px;font-size:1.5rem;display:none"></div>
+                  <div id="spinner" style="position:absolute;left:50%;top:8px;transform:translateX(-50%);display:none"><div class="loader"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:1rem">
+              <div id="result" class="card" style="padding:1rem;background:#fff;border:1px solid #eef2f7;">
+                <h5>Résultat</h5>
+                <div id="resultText" style="font-size:1.1rem;padding-top:.5rem;color:#2b2b2b">En attente de la capture...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% include "footer.html" %}
+
+  <style>
+    #videoContainer { position: relative; }
+    #overlayBox { transition: all 120ms ease; box-sizing: border-box; }
+    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 28px; height: 28px; animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+    .badge-risk { display:inline-block; padding:6px 10px; border-radius:999px; color:#fff; font-weight:700; }
+    .badge-risk.LOW { background: #28a745; }
+    .badge-risk.MODERATE { background: #ff9800; }
+    .badge-risk.HIGH { background: #e53935; }
+    .badge-risk.Error { background: #777; }
+    #countdown { font-weight:700; }
+  </style>
+
+  <!-- MediaPipe FaceMesh via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+  <script>
+    // Keep the same JS logic but update DOM selectors to match new layout
+    const startBtn = document.getElementById('startBtn');
+    const recordBtn = document.getElementById('recordBtn');
+    const video = document.getElementById('video');
+    const videoContainer = document.getElementById('videoContainer');
+    const overlayBox = document.getElementById('overlayBox');
+    const countdown = document.getElementById('countdown');
+    const spinner = document.getElementById('spinner');
+    const phraseBox = document.getElementById('phraseBox');
+    const centerHint = document.getElementById('centerHint');
+    const status = document.getElementById('status');
+    const resultText = document.getElementById('resultText');
+
+    let camera = null;
+    let faceMesh = null;
+    let capturedImageBlob = null;
+    const severityHistory = [];
+    const MAX_HISTORY = 3;
+    const STABLE_THRESHOLD = 2.0;
+    const STABLE_DURATION = 1.5;
+    let lastPredTime = 0;
+    let stableStart = null;
+
+    function csrfToken() {
+      const cookie = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('csrftoken='));
+      return cookie ? cookie.split('=')[1] : '';
+    }
+
+    function updateOverlay(xmin, ymin, xmax, ymax, W, H) {
+      try {
+        if (!videoContainer) return;
+        const rect = video.getBoundingClientRect();
+        const left = (xmin / W) * rect.width;
+        const top = (ymin / H) * rect.height;
+        const width = ((xmax - xmin) / W) * rect.width;
+        const height = ((ymax - ymin) / H) * rect.height;
+        overlayBox.style.left = `${left}px`;
+        overlayBox.style.top = `${top}px`;
+        overlayBox.style.width = `${width}px`;
+        overlayBox.style.height = `${height}px`;
+        overlayBox.style.display = 'block';
+      } catch (e) {
+        console.warn('overlay update failed', e);
+      }
+    }
+
+    async function showCountdown(seconds) {
+      try {
+        countdown.style.display = 'block';
+        for (let i = seconds; i > 0; --i) {
+          countdown.textContent = i;
+          await new Promise(r => setTimeout(r, 1000));
+        }
+        countdown.textContent = 'Enregistrement...';
+      } catch (e) {
+        console.warn('countdown failed', e);
+      }
+    }
+
+    // Preload server-side models immediately when the page loads
+    (async function preloadModels() {
+      try {
+        spinner.style.display = 'block';
+        status.textContent = 'Pré-chargement des modèles...';
+        const resp = await fetch('/stroke/preload/');
+        spinner.style.display = 'none';
+        if (!resp.ok) {
+          status.textContent = 'Échec du pré-chargement des modèles';
+          console.error('Preload failed', resp.status);
+          return;
+        }
+        const j = await resp.json();
+        if (j && j.status === 'ok') {
+          status.textContent = '✓ vous pouvez commencer votre diagnostic';
+          console.info('Preload modules:', j.modules);
+        } else {
+          status.textContent = 'Erreur de pré-chargement';
+          console.error('Preload response', j);
+        }
+      } catch (err) {
+        spinner.style.display = 'none';
+        console.warn('Erreur lors de la requête de pré-chargement', err);
+        // keep the normal flow — preload is optional
+      }
+    })();
+
+    function computeGeneralSymmetry(landmarks, width, height) {
+      const pairs = [[33,263],[61,291],[362,133],[234,454],[93,323]];
+      const nose = [landmarks[1].x * width, landmarks[1].y * height];
+      const diffs = [];
+      for (const [l, r] of pairs) {
+        const left = [landmarks[l].x * width, landmarks[l].y * height];
+        const right = [landmarks[r].x * width, landmarks[r].y * height];
+        diffs.push(Math.abs(Math.abs(left[0]-nose[0]) - Math.abs(right[0]-nose[0])));
+      }
+      return diffs.reduce((a,b)=>a+b,0)/diffs.length;
+    }
+
+    function isFaceCentered(xmin, ymin, xmax, ymax, W, H, tol=0.3) {
+      const cx = (xmin + xmax)/2;
+      const cy = (ymin + ymax)/2;
+      return Math.abs(cx - W/2) < W*tol && Math.abs(cy - H/2) < H*tol;
+    }
+
+    function onResults(results) {
+      if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
+        status.textContent = 'Aucun visage détecté';
+        stableStart = null;
+        severityHistory.length = 0;
+        overlayBox.style.display = 'none';
+        return;
+      }
+
+      const lm = results.multiFaceLandmarks[0];
+      const W = video.videoWidth || video.width;
+      const H = video.videoHeight || video.height;
+      const xs = lm.map(p => p.x * W);
+      const ys = lm.map(p => p.y * H);
+      const xmin = Math.min(...xs), xmax = Math.max(...xs);
+      const ymin = Math.min(...ys), ymax = Math.max(...ys);
+
+      const centered = isFaceCentered(xmin, ymin, xmax, ymax, W, H);
+      const now = Date.now()/1000;
+
+      // update overlay box position and color
+      updateOverlay(xmin, ymin, xmax, ymax, W, H);
+      overlayBox.style.borderColor = centered ? 'rgba(40,167,69,0.9)' : 'rgba(229,57,53,0.9)';
+
+      const left_e = [lm[33].x * W, lm[33].y * H];
+      const right_e = [lm[263].x * W, lm[263].y * H];
+      const iod = Math.hypot(left_e[0]-right_e[0], left_e[1]-right_e[1]) || 1.0;
+      const gen_sym = computeGeneralSymmetry(lm, W, H)/iod;
+
+      if (centered && now - lastPredTime >= 0.3) {
+        lastPredTime = now;
+        if (severityHistory.length >= MAX_HISTORY) severityHistory.shift();
+        severityHistory.push(gen_sym*100);
+        const disp = severityHistory.reduce((a,b)=>a+b,0)/severityHistory.length;
+        status.textContent = `Centré. Score de stabilité : ${disp.toFixed(2)} (en attente)`;
+
+        if (severityHistory.length === MAX_HISTORY) {
+          if (Math.max(...severityHistory) - Math.min(...severityHistory) <= STABLE_THRESHOLD) {
+            if (!stableStart) {
+              stableStart = now;
+              centerHint.textContent = 'Restez immobile un instant...';
+            } else if (now - stableStart >= STABLE_DURATION) {
+              status.textContent = 'Visage stable détecté — capture de l\'image...';
+              centerHint.textContent = '';
+              captureFrameAndSend();
+              if (camera) camera.stop();
+              faceMesh.close();
+            }
+          } else {
+            stableStart = null;
+            centerHint.textContent = 'Veuillez rester centré et immobile';
+          }
+        } else {
+          // not enough samples yet
+          centerHint.textContent = centered ? 'Gardez votre visage centré et immobile' : 'Veuillez centrer votre visage'
+        }
+      } else {
+        status.textContent = centered ? 'Centré (en attente)' : 'Veuillez centrer votre visage';
+        centerHint.textContent = centered ? 'Bougez légèrement pour centrer votre visage' : 'Veuillez aligner votre visage dans la zone';
+      }
+    }
+
+    async function startFaceTracking() {
+      faceMesh = new FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}` });
+      faceMesh.setOptions({ maxNumFaces:1, refineLandmarks:true, minDetectionConfidence:0.7, minTrackingConfidence:0.5 });
+      faceMesh.onResults(onResults);
+      camera = new Camera(video, { onFrame: async () => { await faceMesh.send({image: video}); }, width: 640, height: 480 });
+      camera.start();
+    }
+
+    async function captureFrameAndSend() {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      capturedImageBlob = await new Promise(r => canvas.toBlob(r, 'image/jpeg'));
+      // hide overlay after capture
+      overlayBox.style.display = 'none';
+
+      status.textContent = '';
+      resultText.textContent = '';
+
+      const fd = new FormData();
+      fd.append('image', capturedImageBlob, 'capture.jpg');
+
+      try {
+        spinner.style.display = 'block';
+        const resp = await fetch('/stroke/upload/', { method:'POST', headers:{ 'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrfToken() }, body:fd });
+        spinner.style.display = 'none';
+        if (!resp.ok) { const text = await resp.text(); status.textContent = 'Erreur serveur lors de l\'envoi de l\'image : '+resp.status; resultText.textContent = text; return; }
+        const data = await resp.json();
+        status.textContent = 'Analyse faciale terminée. Veuillez enregistrer la voix.';
+        const fusion = data.fusion || null;
+        // show full multiline explanation
+        if (fusion) {
+          const fullExpl = (fusion.explanation || '').replace(/\n/g, '<br />');
+          resultText.innerHTML = `<div style="margin-bottom:0.5rem"><span class="badge-risk ${fusion.final_risk}">${fusion.final_risk}</span></div><div style="color:#333;line-height:1.6">${fullExpl}</div>`;
+        } else {
+          resultText.textContent = 'Fusion non disponible pour le moment.';
+        }
+        recordBtn.disabled = false;
+      } catch (err) { spinner.style.display = 'none'; status.textContent = 'Échec de l\'envoi : '+err.message; console.error(err); }
+    }
+
+    startBtn.onclick = async () => {
+      try { status.textContent = 'Démarrage de la caméra...'; await navigator.mediaDevices.getUserMedia({ video:true, audio:true }); video.play(); startFaceTracking(); status.textContent = 'Recherche d\'un visage centré et stable...'; startBtn.disabled = true; } catch(err){ status.textContent = 'Erreur d\'accès à la caméra/micro : '+err.message; }
+    };
+
+    recordBtn.onclick = async () => {
+      // Display phrase and record while showing the phrase
+      const phrase = 'aslema ena esmi (ton nom)';
+      phraseBox.textContent = phrase;
+      phraseBox.style.display = 'block';
+      recordBtn.disabled = true;
+      try {
+        status.textContent = 'Préparation à l\'enregistrement...';
+        // small delay so user sees phrase before recording
+        await new Promise(r => setTimeout(r, 700));
+        // show a visible countdown then record
+        await showCountdown(3);
+        const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+        const mediaRec = new MediaRecorder(stream);
+        const chunks = [];
+        mediaRec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+        mediaRec.start();
+        // record for 3 seconds
+        await new Promise(r => setTimeout(r, 3000));
+        mediaRec.stop();
+        await new Promise(resolve => mediaRec.onstop = resolve);
+        stream.getTracks().forEach(t => t.stop());
+        countdown.style.display = 'none';
+        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+
+        status.textContent = 'Envoi de l\'audio et exécution de la fusion...';
+        const fd = new FormData(); if (capturedImageBlob) fd.append('image', capturedImageBlob, 'capture.jpg'); fd.append('audio', audioBlob, 'speech.webm');
+        spinner.style.display = 'block';
+        const resp = await fetch('/stroke/upload/', { method:'POST', headers:{ 'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrfToken() }, body:fd });
+        spinner.style.display = 'none';
+        if (!resp.ok) { const text = await resp.text(); status.textContent = 'Erreur serveur lors de l\'envoi de l\'audio : ' + resp.status; resultText.textContent = text; recordBtn.disabled = false; phraseBox.style.display = 'none'; return; }
+        const data = await resp.json();
+        status.textContent = '';  // Clear status — show only results
+        const fusion = data.fusion || null;
+        if (fusion) {
+          const fullExpl = (fusion.explanation || '').replace(/\n/g, '<br />');
+          resultText.innerHTML = `<div style="margin-bottom:0.5rem"><span class="badge-risk ${fusion.final_risk}">${fusion.final_risk}</span></div><div style="color:#333;line-height:1.6">${fullExpl}</div>`;
+        } else {
+          resultText.textContent = 'Résultat de la fusion manquant.';
+        }
+      } catch (err) {
+        status.textContent = 'Échec de l\'envoi : ' + err.message;
+        console.error(err);
+      }
+      phraseBox.style.display = 'none';
+      recordBtn.disabled = false;
+    };
+  </script>
+</body>

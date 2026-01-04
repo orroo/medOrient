@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'duration_app',
+    'stroke_detection_app',
     # 'face',
     # 'channels',
     # 'check_app',

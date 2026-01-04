@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Téléverser pour le dépistage d'AVC</title>
+  <style>body{font-family:Arial;margin:2rem}</style>
+</head>
+<body>
+  <h1>Téléverser une image et/ou un audio</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div>
+      <label>Image du visage (jpg/png) :</label>
+      <input type="file" name="image" accept="image/*">
+    </div>
+    <div>
+      <label>Audio (wav) :</label>
+      <input type="file" name="audio" accept="audio/*">
+    </div>
+    <div style="margin-top:1rem">
+      <button type="submit">Lancer l'analyse</button>
+    </div>
+  </form>
+  <p><a href="/stroke/">Retour à l'application AVC</a></p>
+</body>
+</html>

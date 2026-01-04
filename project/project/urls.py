@@ -35,6 +35,7 @@ urlpatterns = [
     path('sign_up/', views.sign_up, name='sign_up'),
     
     path('chatbot/', views.chat_bot, name='chatbot'),
+    path('stroke/', include('stroke_detection_app.urls')),
     # path('face/', include('face.urls')),
     # path('duration/live/', views.live_prediction_view, name='live_prediction'),
     # path('bp/' , include('check_app.urls')),
