@@ -7,3 +7,9 @@ numpy
 sentence_transformers 
 rank_bm25 
 dotenv
+tf-keras
+tensorflow
+matplotlib
+joblib
+torchvision   
+torch

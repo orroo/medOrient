@@ -10,16 +10,16 @@ import json
 
 import json
 import textwrap
-from typing import Dict
 
 import os
 import faiss
 import pickle
 import numpy as np
-from typing import List, Dict, Any
+from typing import List, Dict, Any , Optional
 from sentence_transformers import SentenceTransformer
 from rank_bm25 import BM25Okapi
 from dataclasses import dataclass, field
+import time
 
 
 
@@ -27,10 +27,6 @@ from dataclasses import dataclass, field
 from dotenv import load_dotenv
 
 load_dotenv()
-
-
-
-
 
 TOP_K = int(os.getenv("TOP_K", "10"))
 EMBED_MODEL = os.getenv("EMBED_MODEL", "all-MiniLM-L6-v2") # embeddings
