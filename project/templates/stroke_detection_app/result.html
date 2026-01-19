@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Résultat du dépistage d'AVC</title>
+  <style>body{font-family:Arial;margin:2rem}</style>
+</head>
+<body>
+  <h1>Résultat de la détection</h1>
+
+  <h2>Fusion (affichée)</h2>
+  {% if fusion %}
+    <p style="font-size:1.25rem"><strong>Risque final :</strong> {{ fusion.final_risk }}</p>
+    <pre>{{ fusion.explanation }}</pre>
+  {% else %}
+    <p>Aucun résultat de fusion disponible pour le moment.</p>
+  {% endif %}
+
+  <p class="muted">La sévérité/description faciale et les sorties du modèle vocal sont consignées dans la console du serveur pour des raisons de confidentialité et de débogage.</p>
+
+  <p><a href="/stroke/upload/">Exécuter un autre test</a></p>
+  <p><a href="/stroke/">Retour à l'application AVC</a></p>
+</body>
+</html>

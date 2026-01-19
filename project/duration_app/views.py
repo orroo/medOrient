@@ -1,14 +1,78 @@
 from django.shortcuts import render
 
 
-url="http://127.0.0.1:6700/chatbot"
+sump_url= "http://127.0.0.1:7575/chatbot"
 
-def chat_bot(request):
+sump_file_url= "http://127.0.0.1:7575/upload_file"
+
+
+def sump_chat_bot(request):
     return render(request,"chatbot.html",{
-            "chatbot":url,
+            "chatbot":sump_url,
+            "file_url":sump_file_url or "",
             "mode":"vac"
             }
             )
+
+
+cnam_url= "http://127.0.0.1:6700/chatbot"
+
+def cnam_chat_bot(request):
+    return render(request,"chatbot.html",{
+            "chatbot":cnam_url,
+            "mode":"cnam"
+            }
+            )
+
+
+vac_url= "http://127.0.0.1:6700/chatbot"
+
+
+def vac_chat_bot(request):
+    return render(request,"chatbot.html",{
+            "chatbot":vac_url,
+            "mode":"vac"
+            }
+            )
+
+
+ord_url= "http://127.0.0.1:7989/llm"
+
+def ord_chat_bot(request):
+    return render(request,"chatbot.html",{
+            "chatbot":ord_url,
+            "mode":"ord"
+            }
+            )
+
+
+pdf_url= "http://127.0.0.1:7989/llm"
+
+def pdf_chat_bot(request):
+    return render(request,"chatbot.html",{
+            "chatbot":pdf_url,
+            "mode":"cnam"
+            }
+            )
+
+LUNG_UPLOAD_URL= "http://127.0.0.1:7777/lung_predict"
+def lung_predict(request):
+    return render(request,"lung_pred.html",{
+            "UPLOAD_URL":LUNG_UPLOAD_URL,
+            "PROCESS_URL" : sump_url
+            }
+            )
+
+
+CARRIE_UPLOAD_URL= "http://127.0.0.1:7777/carrie_predict"
+def carrie_predict(request):
+    return render(request,"carrie_pred.html",{
+            "UPLOAD_URL":CARRIE_UPLOAD_URL,
+            "PROCESS_URL" : sump_url
+
+            }
+            )
+
 
 def about(request):
     return render(request,"about-us.html")

@@ -34,23 +34,25 @@ urlpatterns = [
     path('sign_in/', views.sign_in, name='sign_in'),
     path('sign_up/', views.sign_up, name='sign_up'),
     
-    path('chatbot/', views.chat_bot, name='chatbot'),
-    # path('face/', include('face.urls')),
-    # path('duration/live/', views.live_prediction_view, name='live_prediction'),
-    # path('bp/' , include('check_app.urls')),
-    # path('leak/', include('leakage_detection_app.urls')),
-    # path('vascular/', include('vascular_monitor.urls')),
-        # path('face/', include('face.urls')),
-    # path('kidney/', include('kidney.urls')),
-    
+    path('lung_predict/', views.lung_predict,name='lung_predict'),
+    path('carrie_predict/', views.carrie_predict,name='carrie_predict'),
+    path('stroke/', include('stroke_detection_app.urls')),
+
+
+    path('chatbot/sump/', views.sump_chat_bot, name='sump_chatbot'),
+    path('chatbot/cnam/', views.cnam_chat_bot, name='cnam_chatbot'),
+    path('chatbot/vac/', views.vac_chat_bot, name='vac_chatbot'),
+    path('chatbot/ord/', views.ord_chat_bot, name='ord_chatbot'),
+    path('chatbot/pdf/', views.pdf_chat_bot , name='pdf_chatbot'),
+
+
  
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-    # path('send-notification/', views.send_notification, name='send_notification'),
+    
     
  
 

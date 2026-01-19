@@ -20,8 +20,8 @@
                                 <i class="ti-pulse"></i>
                             </div>
                             <div class="chat-header-text">
-                                <h3>Dialysis Care Assistant</h3>
-                                <p>AI-powered support for your dialysis journey</p>
+                                <h3>MedOrient</h3>
+                                <p>Medical Assistant</p>
                             </div>
                         </div>
 
@@ -32,39 +32,33 @@
                                 </div>
                                 <div>
                                     <div class="message-content">
-                                        Hello! I'm your Dialysis Care Assistant. I'm here to help you with information about patient monitoring, session planning, and answering any questions you may have. How can I assist you today?
+                                       Bonjour ! Je suis votre assistant médical. Comment puis-je vous aider aujourd'hui ?
                                     </div>
                                     <div class="message-time">Just now</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="quick-replies">
-                            <button class="quick-reply-btn" onclick="sendQuickReply('Tell me about patient monitoring')">
-                                Patient Monitoring
-                            </button>
-                            <button class="quick-reply-btn" onclick="sendQuickReply('What is vascular sonics?')">
-                                Vascular Sonics
-                            </button>
-                            <button class="quick-reply-btn" onclick="sendQuickReply('Explain dialysis sessions')">
-                                Dialysis Sessions
-                            </button>
-                            <button class="quick-reply-btn" onclick="sendQuickReply('How does pain detection work?')">
-                                Pain Detection
-                            </button>
-                        </div>
+                  
 
                         <div class="chat-input-container">
                             <button class="voice-button" id="micButton" onclick="toggleSpeechRecognition()">
                                 <i class="ti-microphone"></i>
                             </button>
-                            <input 
-                                type="text" 
-                                class="chat-input" 
-                                id="messageInput" 
-                                placeholder="Type your message here..."
-                                onkeypress="handleKeyPress(event)"
-                            >
+                            <button class="attachment-button" id="attachButton" onclick="document.getElementById('fileInput').click()">
+                                <i class="ti-clip"></i>
+                            </button>
+                            <input type="file" id="fileInput" class="file-input" onchange="handleFileSelect(event)" accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx">
+                            <div style="flex: 1;">
+                                <input 
+                                    type="text" 
+                                    class="chat-input" 
+                                    id="messageInput" 
+                                    placeholder="Type your message here..."
+                                    onkeypress="handleKeyPress(event)"
+                                >
+                                <div id="filePreview"></div>
+                            </div>
                             <button class="send-button" onclick="sendMessage()">
                                 <i class="ti-arrow-right"></i>
                             </button>
@@ -88,11 +82,89 @@
             'default': 'I understand you\'re asking about dialysis care. Our platform offers patient monitoring, early detection systems, and process optimization. Could you please be more specific about what you\'d like to know?'
         };
 
+
+
+        const MAX_IMAGE_WIDTH = 224;
+        const MAX_IMAGE_HEIGHT = 224;
+        const IMAGE_QUALITY = 0.8;
+
+
+        function resizeImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    
+                    img.onload = function() {
+                        // Calculate new dimensions while maintaining aspect ratio
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > MAX_IMAGE_WIDTH || height > MAX_IMAGE_HEIGHT) {
+                            const aspectRatio = width / height;
+                            
+                            if (width > height) {
+                                width = MAX_IMAGE_WIDTH;
+                                height = width / aspectRatio;
+                            } else {
+                                height = MAX_IMAGE_HEIGHT;
+                                width = height * aspectRatio;
+                            }
+                        }
+                        
+                        // Create canvas and resize
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convert canvas to blob
+                        canvas.toBlob(
+                            function(blob) {
+                                // Create new File object with same name
+                                const resizedFile = new File([blob], file.name, {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                });
+                                
+                                console.log(`Original size: ${(file.size / 1024).toFixed(2)} KB`);
+                                console.log(`Resized size: ${(resizedFile.size / 1024).toFixed(2)} KB`);
+                                console.log(`Original dimensions: ${img.width}x${img.height}`);
+                                console.log(`Resized dimensions: ${width}x${height}`);
+                                
+                                resolve(resizedFile);
+                            },
+                            'image/jpeg',
+                            IMAGE_QUALITY
+                        );
+                    };
+                    
+                    img.onerror = function() {
+                        reject(new Error('Failed to load image'));
+                    };
+                    
+                    img.src = e.target.result;
+                };
+                
+                reader.onerror = function() {
+                    reject(new Error('Failed to read file'));
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+
         function getCurrentTime() {
             const now = new Date();
             return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         }
 
+        function isImageFile(String){
+            return true;
+        }
         // function addMessage(text, isUser) {
         //     const messagesContainer = document.getElementById('chatMessages');
         //     const messageDiv = document.createElement('div');
@@ -117,13 +189,27 @@
 
         let recognition = null;
         let isRecording = false;
+        let selectedFile = null;
+
+
+        const FILE_UPLOAD_URL = '{{ file_url }}';
+
+
+
+
+        function getUploadHeaders() {
+            return {
+                'X-CSRFToken': getCookie('csrftoken'),  // Uncomment this
+            };
+        }
+
 
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
             recognition.continuous = false;
             recognition.interimResults = false;
-            recognition.lang = 'en-US';
+            recognition.lang = 'fr-FR';
 
             recognition.onresult = function(event) {
                 const transcript = event.results[0][0].transcript;
@@ -197,35 +283,35 @@
             }
         }   
 
-        function addMessage(text, isUser) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+        // function addMessage(text, isUser) {
+        //     const messagesContainer = document.getElementById('chatMessages');
+        //     const messageDiv = document.createElement('div');
+        //     messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
             
-            const avatarIcon = isUser ? 'ti-user' : 'ti-pulse';
+        //     const avatarIcon = isUser ? 'ti-user' : 'ti-pulse';
             
-            const speakerButton = isUser ? '' : `
-                <button class="speaker-button" onclick="speakText('${text.replace(/'/g, "\\'")}', this)">
-                    <i class="ti-volume"></i>
-                </button>
-            `;
-            const className = isUser ? 'message-content-user' : 'message-content';
-            messageDiv.innerHTML = `
-                <div class="message-avatar">
-                    <i class="${avatarIcon}"></i>
-                </div>
-                <div>
-                    <div class="${className}">
-                        ${text}
-                        ${speakerButton}
-                    </div>
-                    <div class="message-time">${getCurrentTime()}</div>
-                </div>
-            `;
+        //     const speakerButton = isUser ? '' : `
+        //         <button class="speaker-button" onclick="speakText('${text.replace(/'/g, "\\'")}', this)">
+        //             <i class="ti-volume"></i>
+        //         </button>
+        //     `;
+        //     const className = isUser ? 'message-content-user' : 'message-content';
+        //     messageDiv.innerHTML = `
+        //         <div class="message-avatar">
+        //             <i class="${avatarIcon}"></i>
+        //         </div>
+        //         <div>
+        //             <div class="${className}">
+        //                 ${text}
+        //                 ${speakerButton}
+        //             </div>
+        //             <div class="message-time">${getCurrentTime()}</div>
+        //         </div>
+        //     `;
             
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
+        //     messagesContainer.appendChild(messageDiv);
+        //     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        // }
 
         function showTypingIndicator() {
             const messagesContainer = document.getElementById('chatMessages');
@@ -252,23 +338,405 @@
                 typingIndicator.remove();
             }
         }
+        
+        let questions = [];
+        let answers = [];
+        conv_id="";
 
+
+        
+// ============ FILE HANDLING FUNCTIONS ============
+        
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                // if (isImageFile(file.name)) {
+                //     // filePreviewURL = URL.createObjectURL(file);
+                    
+                // }
+                if (isImageFile(file.name)) {
+                    try {
+                        const resizedFile = await resizeImage(file);
+                        selectedFile = resizedFile;
+                        filePreviewURL = URL.createObjectURL(resizedFile);
+                        showFilePreview(resizedFile);
+                    } catch (error) {
+                        console.error('Error resizing image:', error);
+                        // Fallback to original file if resize fails
+                        selectedFile = file;
+                        filePreviewURL = URL.createObjectURL(file);
+                        showFilePreview(file);
+                    }
+                } else {
+                    // Non-image files are not resized
+                    selectedFile = file;
+                    showFilePreview(file);
+                }
+                
+                showFilePreview(file);
+            }
+        }
+
+        function showFilePreview(file) {
+            const preview = document.getElementById('filePreview');
+            const fileSize = (file.size / 1024).toFixed(2); // Convert to KB
+            
+            preview.innerHTML = `
+                <div class="file-preview">
+                    <i class="ti-file file-preview-icon"></i>
+                    <span class="file-preview-name">${file.name} (${fileSize} KB)</span>
+                    <i class="ti-close file-preview-remove" onclick="removeFilePreview()"></i>
+                </div>
+            `;
+        }
+
+        function removeFilePreview() {
+            selectedFile = null;
+            document.getElementById('filePreview').innerHTML = '';
+            document.getElementById('fileInput').value = '';
+        }
+
+        async function uploadFile(file, message) {
+            // const formData = new FormData();
+            // formData.append('file', file);
+            
+            // Add any additional data you want to send
+            // formData.append('timestamp', new Date().toISOString());
+            
+            // const attachButton = document.getElementById('attachButton');
+            attachButton.classList.add('uploading');
+            // Read file as ArrayBuffer then convert to base64
+            const arrayBuffer = await file.arrayBuffer();
+            const bytes = new Uint8Array(arrayBuffer);
+            const fileContent = btoa(String.fromCharCode(...bytes));
+            // const fileContent = await new Promise((resolve, reject) => {
+            // const reader = new FileReader();
+            //     reader.onload = () => {
+            //         // Remove data URL prefix (e.g., "data:image/png;base64,")
+            //         const base64 = reader.result.split(',')[1];
+            //         resolve(base64);
+            //     };
+            //     reader.onerror = reject;
+            //     reader.readAsDataURL(file);
+            // });
+
+            console.log(file.name);
+            console.log((fileContent))
+            
+            try {
+                // const response = await fetch(FILE_UPLOAD_URL, {
+                //     method: 'POST',
+                //     headers: getUploadHeaders(),
+                //     body: formData
+                // });
+                
+            // Prepare request
+                const response = await fetch(FILE_UPLOAD_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        file_name: file.name,
+                        file_content: fileContent
+                    })
+                });
+
+                attachButton.classList.remove('uploading');
+
+                if (!response.ok) {
+                    throw new Error(`Upload failed: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                return result;
+                
+            } catch (error) {
+                attachButton.classList.remove('uploading');
+                console.error('File upload error:', error);
+                throw error;
+            }
+        }
+
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // Remove the data URL prefix (e.g., "data:image/png;base64,")
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        // Helper function to get CSRF token for Django (uncomment if needed)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        }
+// function addMessage(text, isUser, isFileMessage = false, imageURL = null) {
+//     const messagesContainer = document.getElementById('chatMessages');
+//     const messageDiv = document.createElement('div');
+//     messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+    
+//     const avatarIcon = isUser ? 'ti-user' : 'ti-pulse';
+    
+//     const speakerButton = isUser ? '' : `
+//         <button class="speaker-button" onclick="speakText('${text.replace(/'/g, "\\'")}', this)">
+//             <i class="ti-volume"></i>
+//         </button>
+//     `;
+
+//     const contentClass = isFileMessage ? 'message-content file-message' : 'message-content';
+//     const fileIcon = isFileMessage && !imageURL ? '<i class="ti-file file-icon-large"></i>' : '';
+    
+//     let imageHTML = '';
+//     if (imageURL) {
+//         imageHTML = `<div class="image-preview-container">
+//             <img src="${imageURL}" alt="Uploaded image" class="message-image" onclick="openImageModal('${imageURL}')">
+//         </div>`;
+//     }
+    
+//     // Build content based on whether it's a file message or image
+//     let contentHTML = '';
+//     if (!imageURL) {  // Ne pas afficher message-content s'il y a une image
+//         if (isFileMessage) {
+//             contentHTML = `<div class="${contentClass}">
+//                 ${fileIcon}
+//                 ${speakerButton}
+//             </div>`;
+//         } else {
+//             contentHTML = `<div class="${contentClass}">
+//                 <span>${text}</span>
+//                 ${speakerButton}
+//             </div>`;
+//         }
+//     }
+    
+//     messageDiv.innerHTML = `
+//         <div class="message-avatar">
+//             <i class="${avatarIcon}"></i>
+//         </div>
+//         <div>
+//             ${contentHTML}
+//             ${imageHTML}
+//             <div class="message-time">${getCurrentTime()}</div>
+//         </div>
+//     `;
+    
+//     messagesContainer.appendChild(messageDiv);
+//     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+// }
+        function addMessage(text, isUser, isFileMessage = false, imageURL = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatarIcon = isUser ? 'ti-user' : 'ti-pulse';
+            
+            const speakerButton = isUser ? '' : `
+                <button class="speaker-button" onclick="speakText('${text.replace(/'/g, "\\'")}', this)">
+                    <i class="ti-volume"></i>
+                </button>
+            `;
+
+            const contentClass = isFileMessage ? 'message-content file-message' : 'message-content';
+            const fileIcon = isFileMessage && !imageURL ? '<i class="ti-file file-icon-large"></i>' : '';
+            
+            let imageHTML = '';
+            if (imageURL) {
+                imageHTML = `<div class="image-preview-container">
+                    <img src="${imageURL}" alt="Uploaded image" class="message-image" onclick="openImageModal('${imageURL}')">
+                </div>`;
+            }
+            // text=""
+            // if(isFileMessage)
+            // {
+                text=` <div class="${contentClass}" style="margin-top: 10px ;width: 400px;">
+                        ${fileIcon}
+                        <span>${text}</span>
+                        ${speakerButton}
+                    </div>`
+            // }
+            
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="${avatarIcon}"></i>
+                </div>
+                <div>
+                    ${imageHTML}
+                    ${text}
+                    <div class="message-time">${getCurrentTime()}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // function addMessage(text, isUser, isFileMessage = false) {
+        //     const messagesContainer = document.getElementById('chatMessages');
+        //     const messageDiv = document.createElement('div');
+        //     messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+        //     const avatarIcon = isUser ? 'ti-user' : 'ti-pulse';
+            
+        //     const speakerButton = isUser ? '' : `
+        //         <button class="speaker-button" onclick="speakText('${text.replace(/'/g, "\\'")}', this)">
+        //             <i class="ti-volume"></i>
+        //         </button>
+        //     `;
+
+        //     const contentClass = isFileMessage ? 'message-content file-message' : 'message-content';
+        //     // const fileIcon = isFileMessage ? '<i class="ti-file file-icon-large"></i>' : '';
+        //     const fileIcon = isFileMessage && !imageURL ? '<i class="ti-file file-icon-large"></i>' : '';
+            
+        //     let imageHTML = '';
+        //     if (imageURL) {
+        //         imageHTML = `<div class="image-preview-container">
+        //             <img src="${imageURL}" alt="Uploaded image" class="message-image" onclick="openImageModal('${imageURL}')">
+        //         </div>`;
+        //     }
+            
+        //     messageDiv.innerHTML = `
+        //         <div class="message-avatar">
+        //             <i class="${avatarIcon}"></i>
+        //         </div>
+        //         <div>
+        //             <div class="${contentClass}">
+        //                 ${fileIcon}
+        //                 <span>${text}</span>
+        //                 ${speakerButton}
+        //             </div>
+        //             <div class="message-time">${getCurrentTime()}</div>
+        //         </div>
+        //     `;
+            
+        //     messagesContainer.appendChild(messageDiv);
+        //     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        // }
+        // async function sendquestionsToUrl(userMessage) {
+        //     const url = '{{ chatbot }}';
+        //     if (userMessage.questions) {
+        //         questions = userMessage.questions;
+        //     } else if (userMessage.answer) {
+        //         answers.push(userMessage.answer);
+        //     }
+
+        //     if (questions.length > 0 && answers.length === questions.length) {
+        //         const response = await fetch(url, {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json'
+        //             },
+        //             body: JSON.stringify({
+        //                 questions,
+        //                 answers
+        //             })
+        //         });
+        //         const finalAnswer = await response.json();
+        //         return finalAnswer;
+        //     }
+
+        //     return null;
+        // }
+
+        function openImageModal(imageURL) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.classList.add('active');
+            modalImg.src = imageURL;
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+        }
 
         async function sendMessageToUrl(userMessage) {
-            const url = '{{ chatbot }}';
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    mode: '{{ mode }}',
-                    question: userMessage
-                })
-            });
-            const data = await response.json();
-            console.log(data.answer);
-            return data.answer;
+
+            if (questions.length == 0) {
+        
+                const url = '{{ chatbot }}';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mode: '{{ mode }}',
+                        question: userMessage
+                    })
+                });
+                
+
+                const data = await response.json();
+                answer=data.answer;
+                if (data.questions) {
+                    console.log(data.questions);
+                    questions = data.questions;
+                    answer=answer+"\n"+data.questions[0];
+                    conv_id=data.conversation_id;
+                }
+                console.log(answer);
+                return answer;
+            }
+            else if (questions.length != 0 && (answers.length != questions.length || answers )){
+                answers.push(userMessage);
+                console.log(userMessage);
+
+                if (answers.length != questions.length){
+                    console.log(questions[answers.length]);
+                    // setTimeout(() => {
+                        return questions[answers.length];
+                    // },1500)
+                }
+            }
+            if (questions.length != 0 && answers.length == questions.length){
+
+                const answersObject = {};
+                questions.forEach((question, index) => {
+                    answersObject[question] = answers[index];
+                });
+
+                const url = '{{ chatbot }}';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question: "final",
+                        conversation_id: conv_id,
+                        answers:answersObject
+                    })
+                });
+                questions=[];
+                answers=[];
+                conv_id="";
+                const finalAnswer = await response.json();
+                return finalAnswer.answer;
+            }
+            return null;
         }
 
 
@@ -286,6 +754,10 @@
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
+            if (selectedFile) {
+                sendFileMessage();
+                return;
+            }
             
             if (message === '') return;
             
@@ -299,6 +771,55 @@
 
             addMessage(botResponse, false);
 
+        }
+
+
+        async function sendFileMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!selectedFile) return;
+            
+            const isImage = isImageFile(selectedFile.name);
+            
+            // Show user message with file/image
+            if (isImage) {
+                addMessage(message, true, true, filePreviewURL);
+            } else {
+                addMessage(`${message} - ${selectedFile.name}`, true, true);
+            }
+            
+            // Show user message with file
+            // addMessage(`${message} - ${selectedFile.name}`, true, true);
+            input.value = '';
+            
+            showTypingIndicator();
+            
+            try {
+                // Upload file to your backend
+                const result = await uploadFile(selectedFile,message);
+                removeFilePreview();
+
+                
+                removeTypingIndicator();
+                
+                // Display the response from your backend
+                // Adjust this based on your backend response structure
+                const botResponse = result.answer || result.response || 'File processed successfully!';
+                addMessage(botResponse, false);
+                
+                // If your backend returns additional data, you can handle it here
+                if (result.data) {
+                    console.log('Additional data from backend:', result.data);
+                }
+                
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage('Sorry, there was an error processing your file. Please try again.', false);
+                console.error('Error:', error);
+            }
+            
+            selectedFile = null;
         }
 
         function sendQuickReply(message) {

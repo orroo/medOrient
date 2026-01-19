@@ -38,11 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'duration_app',
-    # 'face',
-    # 'channels',
-    # 'check_app',
-    # 'leakage_detection_app',
-    # 'vascular_monitor',
+    'stroke_detection_app',
+    
 
 ]
 

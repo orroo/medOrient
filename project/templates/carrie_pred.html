@@ -1,0 +1,565 @@
+{% load static %}
+{% include "css.html" %}
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .upload-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #e8ebff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-area {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .preview-area.active {
+            display: block;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .preview-title {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .remove-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #ff3838;
+            transform: scale(1.1);
+        }
+
+        .preview-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-icon {
+            font-size: 40px;
+            color: #667eea;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .file-size {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .send-btn.loading {
+            position: relative;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .response-area {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .response-area.active {
+            display: block;
+        }
+
+        .response-title {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .response-text {
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+      <!--================Header Menu Area =================-->
+    {% include "header.html" %}
+
+    <!-- ================Header Menu Area =================  -->
+    <div class="upload-container">
+        <div class="header">
+            <h1>carrie teeth Xray Prediction</h1>
+            <p>Upload your Xray file and get instant Prediction</p>
+        </div>
+
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">
+                <i class="ti-cloud-up"></i>
+            </div>
+            <div class="upload-text">Click to upload or drag and drop</div>
+            <div class="upload-subtext">Supports:  Images (JPG, PNG)</div>
+        </div>
+
+        <input 
+            type="file" 
+            id="fileInput" 
+            class="file-input"
+            accept=".jpg,.jpeg,.png"
+        >
+
+        <div class="preview-area" id="previewArea">
+            <div class="preview-header">
+                <div class="preview-title">Selected File</div>
+                <button class="remove-btn" onclick="removeFile()">
+                    <i class="ti-close"></i>
+                </button>
+            </div>
+            <div class="preview-content">
+                <div class="file-icon" id="fileIcon">
+                    <i class="ti-file"></i>
+                </div>
+                <div class="file-info">
+                    <div class="file-name" id="fileName"></div>
+                    <div class="file-size" id="fileSize"></div>
+                </div>
+            </div>
+            <img id="imagePreview" class="image-preview" style="display: none;">
+        </div>
+<!-- 
+        <textarea 
+            class="message-input" 
+            id="messageInput" 
+            placeholder="Add a message (optional)..."
+        ></textarea> -->
+
+        <button class="send-btn" id="sendBtn" onclick="sendFile()" disabled>
+            <i class="ti-arrow-right"></i>
+            <span id="btnText">Send File</span>
+        </button>
+
+        <div class="response-area" id="responseArea">
+            <div class="response-title">
+                <i class="ti-check"></i>
+                Response
+            </div>
+            <div class="response-text" id="responseText"></div>
+        </div>
+        <div class="response-area" id="processArea">
+            <div class="response-title">
+                <i class="ti-info"></i>
+                Process Result
+            </div>
+            <div class="response-text" id="processText"></div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_IMAGE_WIDTH = 224;
+        const MAX_IMAGE_HEIGHT = 224;
+        const IMAGE_QUALITY = 0.8;
+        const UPLOAD_URL = '{{UPLOAD_URL}}'; // Change this to your actual upload URL
+        const PROCESS_URL = '{{PROCESS_URL}}'; // Change this to your actual process URL
+
+
+        let selectedFile = null;
+
+        // File input change handler
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+        // Drag and drop handlers
+        const uploadArea = document.getElementById('uploadArea');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                await handleFile(file);
+            }
+        }
+
+        async function handleFile(file) {
+            if (isImageFile(file.name)) {
+                try {
+                    selectedFile = await resizeImage(file);
+                    showFilePreview(selectedFile, true);
+                } catch (error) {
+                    console.error('Error resizing image:', error);
+                    selectedFile = file;
+                    showFilePreview(file, true);
+                }
+            } else {
+                selectedFile = file;
+                showFilePreview(file, false);
+            }
+        }
+
+        function isImageFile(filename) {
+            const ext = filename.toLowerCase().split('.').pop();
+            return ['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext);
+        }
+
+        function resizeImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    
+                    img.onload = function() {
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > MAX_IMAGE_WIDTH || height > MAX_IMAGE_HEIGHT) {
+                            const aspectRatio = width / height;
+                            
+                            if (width > height) {
+                                width = MAX_IMAGE_WIDTH;
+                                height = width / aspectRatio;
+                            } else {
+                                height = MAX_IMAGE_HEIGHT;
+                                width = height * aspectRatio;
+                            }
+                        }
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        canvas.toBlob(
+                            function(blob) {
+                                const resizedFile = new File([blob], file.name, {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                });
+                                
+                                console.log(`Original: ${(file.size / 1024).toFixed(2)} KB`);
+                                console.log(`Resized: ${(resizedFile.size / 1024).toFixed(2)} KB`);
+                                
+                                resolve(resizedFile);
+                            },
+                            'image/jpeg',
+                            IMAGE_QUALITY
+                        );
+                    };
+                    
+                    img.onerror = () => reject(new Error('Failed to load image'));
+                    img.src = e.target.result;
+                };
+                
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function showFilePreview(file, isImage) {
+            const previewArea = document.getElementById('previewArea');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const imagePreview = document.getElementById('imagePreview');
+            const sendBtn = document.getElementById('sendBtn');
+
+            fileName.textContent = file.name;
+            fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
+            
+            if (isImage) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.style.display = 'none';
+            }
+
+            previewArea.classList.add('active');
+            sendBtn.disabled = false;
+            document.getElementById('responseArea').classList.remove('active');
+        }
+
+        function removeFile() {
+            selectedFile = null;
+            document.getElementById('previewArea').classList.remove('active');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('sendBtn').disabled = true;
+            document.getElementById('imagePreview').style.display = 'none';
+        }
+
+        async function sendFile() {
+            if (!selectedFile) return;
+
+            // const message = document.getElementById('messageInput').value.trim();
+            const sendBtn = document.getElementById('sendBtn');
+            const btnText = document.getElementById('btnText');
+            const responseArea = document.getElementById('responseArea');
+            const responseText = document.getElementById('responseText');
+
+            // Show loading state
+            sendBtn.disabled = true;
+            sendBtn.classList.add('loading');
+            btnText.innerHTML = '<div class="spinner"></div> Uploading...';
+            responseArea.classList.remove('active');
+
+            try {
+                // Read file as base64
+                const arrayBuffer = await selectedFile.arrayBuffer();
+                const bytes = new Uint8Array(arrayBuffer);
+                const fileContent = btoa(String.fromCharCode(...bytes));
+
+                // Send to server
+                const response = await fetch(UPLOAD_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: "test",
+                        file_name: selectedFile.name,
+                        file_content: fileContent
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Upload failed: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                // Display response
+                responseText.textContent = result.answer || result.response || 'File processed successfully!';
+                responseArea.classList.add('active');
+                try {
+                    if (PROCESS_URL) {
+                        const procResp = await fetch(PROCESS_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                
+                                question: "c'est qui la carrie : "+responseText.textContent
+                    
+                            })
+                        });
+
+                        if (procResp.ok) {
+                            const procJson = await procResp.json();
+                            const text = procJson.text || procJson.answer || procJson.response || procJson.result || '';
+                            document.getElementById('processText').textContent = text || 'No text returned from processing.';
+                            document.getElementById('processArea').classList.add('active');
+                        } else {
+                            console.warn('Processing endpoint returned non-OK status:', procResp.status);
+                        }
+                    }
+                } catch (procError) {
+                    console.error('Processing error:', procError);
+                }
+                // Reset message input
+                // document.getElementById('messageInput').value = '';
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                responseText.textContent = 'Sorry, there was an error processing your file. Please try again.';
+                responseArea.classList.add('active');
+            } finally {
+                // Reset button state
+                sendBtn.disabled = false;
+                sendBtn.classList.remove('loading');
+                btnText.innerHTML = '<i class="ti-arrow-right"></i> Send File';
+            }
+        }
+    </script>
+</body>
+</html>

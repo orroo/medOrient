@@ -1,12 +1,9 @@
-django
-channels
-requests
-Django>=4.2
 colorama==0.4.6
 httpx==0.28.1
 joblib==1.4.2
 librosa==0.11.0
-mediapipe>=0.10.22  # Updated version supports numpy 2.x
+mediapipe==0.10.21
+numpy==1.26.4
 openai==2.14.0
 opencv_python==4.12.0.88
 pandas==2.3.3
@@ -14,7 +11,7 @@ scikit_learn==1.8.0
 scipy==1.16.3
 sounddevice==0.5.3
 tensorflow==2.20.0
-torch
+torch==2.7.1
 tqdm==4.67.1
 transformers==4.52.3
-protobuf
+protobuf==3.20.3
